@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Prova2</title>
+    <script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js@3.0/dist/svg.min.js"></script>
+
+    <style>
+        canvas {
+            width: 703px;
+            height: 703px;
+            border: 1px solid black;
+            margin: 0 auto;
+        }
+    </style>
+
+</head>
+
+<body onload="Inicio()">
+
+    <p id="demo"></p>
+    <p id="demo2"></p>
+    <p id="demo3"></p>
+    <p id="semaforo"></p>
+    <p id="semaforo2"></p>
+    <script>
+
+        var Carro1, Carro2, Carro3, Carro4;
+        var Fundo;
+        var semaforoP1, semaforoP2;
+
+        function Inicio() {
+            Carro1 = new component(120, 50, "img/carro1.png", -150, 180, "image");
+            Carro2 = new component(50, 120, "img/carro2.png", 180, 400, "image");
+            Carro3 = new component(120, 50, "img/carro3.png", 450, 150, "image");
+            Carro4 = new component(120, 70, "img/carro4.png", 350, 145, "image");
+            Fundo = new component(703, 703, "img/fundo2.png", 0, 0, "image");
+            semaforoP2 = new component(60, 150, "img/semaforoVerde.png", 210, 60, "image");
+            semaforoP1 = new component(60, 150, "img/semaforoVermelho.png", 110, 150, "image");
+            myGameArea.start();
+        }
+
+        var myGameArea = {
+            canvas: document.createElement("canvas"),
+            start: function () {
+                this.canvas.width = 703;
+                this.canvas.height = 703;
+                this.context = this.canvas.getContext("2d");
+                document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+                this.frameNo = 0;
+                this.interval = setInterval(updateGameArea, 20);
+            },
+            clear: function () {
+                this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            },
+            stop: function () {
+                clearInterval(this.interval);
+            }
+        }
+
+        function component(width, height, color, x, y, type) {
+            this.type = type;
+            this.image = new Image();
+            this.image.src = color;
+            this.width = width;
+            this.height = height;
+            this.speedX = 0;
+            this.speedY = 0;
+            this.angle = 0;
+            this.x = x;
+            this.y = y;
+
+            this.update = function () {
+                ctx = myGameArea.context;
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                ctx.drawImage(this.image,
+                    this.x,
+                    this.y,
+                    this.width, this.height);
+                ctx.restore();
+            }
+            this.newPos = function () {
+                this.x += this.speedX;
+                this.y += this.speedY;
+            }
+        }
+
+        function updateGameArea() {
+            myGameArea.clear();
+            Fundo.newPos();
+            Fundo.update();
+            Carro1.newPos();
+            Carro1.update();
+            Carro2.newPos();
+            Carro2.update();
+            Carro3.newPos();
+            Carro3.update();
+            Carro4.newPos();
+            Carro4.update();
+            semaforoP1.update();
+            semaforoP2.update();
+            Semaforos();
+            pararCarro1();
+            pararCarro2();
+            reset();
+        }
+
+        /*function clearmove() {
+            Carro1.image.src = "img/carro1.png";
+            Carro1.speedX = 0;
+            Carro1.speedY = 0;
+            Carro2.image.src = "img/carro2.png";
+            Carro2.speedX = 0;
+            Carro2.speedY = 0;
+        }*/
+
+        var tempo, curva, pers;
+        tempo = 0;
+        curva = 0;
+        pers = 0;
+        var semaforo, semaforo2;
+
+        function Semaforos() {
+            tempo = tempo + 0.125;
+            document.getElementById("demo").innerHTML = tempo;
+            document.getElementById("demo2").innerHTML = curva;
+            document.getElementById("demo3").innerHTML = pers;
+            document.getElementById("semaforo").innerHTML = semaforo;
+            document.getElementById("semaforo2").innerHTML = semaforo2;
+            if (tempo >= 0 && tempo < 40) {
+                /*      1 = verde
+                        2 = amarelo
+                        3 = vermelho
+                */
+                semaforo = 3;
+                semaforoP1.image.src = "img/semaforoVermelho.png";
+                semaforo2 = 1;
+                semaforoP2.image.src = "img/semaforoVerde.png";
+
+                if (tempo >= 20 && tempo < 40) {
+                    semaforo = 3;
+                    semaforo2 = 2;
+                    semaforoP2.image.src = "img/semaforoAmarelo.png";
+                    if (pers == 1) {
+                        Carro3.speedX = -6;
+                        Carro4.speedX = -6;
+
+                    }
+                }
+            }
+            else if (tempo >= 40 && tempo < 80) {
+                semaforo = 1;
+                semaforoP1.image.src = "img/semaforoVerde.png";
+                semaforo2 = 3;
+                semaforoP2.image.src = "img/semaforoVermelho.png";
+            }
+            else if (tempo >= 80 && tempo <= 100) {
+                semaforo = 2;
+                semaforoP1.image.src = "img/semaforoAmarelo.png";
+                semaforo2 = 3;
+            }
+            else if (tempo > 100) {
+                tempo = 0;
+                curva = curva + 1;
+                pers = pers + 1;
+                if (curva > 1) {
+                    curva = 0;
+                }
+                if (pers > 1) {
+                    pers = 0;
+                    Carro3 = new component(120, 50, "img/carro3.png", 450, 150, "image");
+                    Carro4 = new component(120, 70, "img/carro4.png", 350, 145, "image");
+                }
+            }
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function rotate() {
+            for (var i = 0; i < 90; i++) {
+                Carro1.angle -= 1 * Math.PI / 180;
+                await sleep(0.1);
+                Carro1.y += 1.3 + (0.01 * i);
+                Carro1.x -= 0.95 + (0.001 * i);
+
+            }
+            Carro1.speedX = 2;
+        }
+
+        function pararCarro1() {
+            if (Carro1.x == 50 && semaforo == 3) {
+                Carro1.speedX = 0;
+            }
+            else if (Carro1.x == 110 && curva == 1) {
+                Carro1.speedX = 0;
+                Carro1.speedY = -2;
+                rotate();
+            }
+
+            else {
+                Carro1.speedX = 2;
+            }
+        }
+
+        function pararCarro2() {
+            if (Carro2.y == 240 && (semaforo2 == 3 || semaforo2 == 2)) {
+                Carro2.speedY = 0;
+            }
+            else {
+                Carro2.speedY = -2;
+            }
+        }
+
+        function reset() {
+            if (Carro1.x >= 450) {
+                Carro1 = new component(120, 50, "img/carro1.png", -150, 180, "image");
+            }
+            if (Carro1.y <= -20) {
+                Carro1 = new component(120, 50, "img/carro1.png", -150, 180, "image");
+            }
+            if (Carro2.y <= -80) {
+                Carro2 = new component(50, 120, "img/carro2.png", 180, 400, "image");
+            }
+        }
+
+
+    </script>
+
+</body>
+
+</html>
